@@ -1,9 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import MoviePlayer from './pages/MoviePlayer';
-import CollectionsPage from './pages/CollectionsPage';
-import SearchPage from './pages/SearchPage';
-import Layout from './components/Layout';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import MoviePlayer from "./pages/MoviePlayer";
+import CollectionsPage from "./pages/CollectionsPage";
+import SearchPage from "./pages/SearchPage";
+import Layout from "./components/Layout";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/collections" element={<CollectionsPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/movie/:id" element={<MoviePlayer />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </Layout>
     </Router>

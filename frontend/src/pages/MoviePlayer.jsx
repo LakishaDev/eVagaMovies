@@ -1,16 +1,19 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../utils/api';
-import { ArrowLeft } from 'lucide-react';
-import CustomVideoPlayer from '../components/CustomVideoPlayer';
-import MovieLoader from '../components/MovieLoader';
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { api } from "../utils/api";
+import { ArrowLeft } from "lucide-react";
+import CustomVideoPlayer from "../components/CustomVideoPlayer";
+import ThumbnailSelector from "../components/ThumbnailSelector";
+import MovieLoader from "../components/MovieLoader";
 
 export default function MoviePlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+  const videoRef = useRef(null);
+
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [videoDuration, setVideoDuration] = useState(0);
 
   useEffect(() => {
     loadMovie();
@@ -24,7 +27,7 @@ export default function MoviePlayer() {
         setMovie(result.data);
       }
     } catch (error) {
-      console.error('Failed to load movie:', error);
+      console.error("Failed to load movie:", error);
     } finally {
       setLoading(false);
     }
@@ -53,14 +56,16 @@ export default function MoviePlayer() {
       </button>
 
       <CustomVideoPlayer
+        ref={videoRef}
         src={api.getStreamUrl(id)}
         subtitleSrc={movie.subtitle_path ? api.getSubtitleUrl(id) : null}
         movie={movie}
+        onDurationChange={setVideoDuration}
       />
 
       <div className="mt-8 bg-gray-800/50 rounded-lg p-6">
         <h1 className="text-3xl font-bold text-white mb-4">{movie.title}</h1>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           {movie.year && (
             <div>
@@ -68,35 +73,35 @@ export default function MoviePlayer() {
               <p className="text-white font-semibold">{movie.year}</p>
             </div>
           )}
-          
+
           {movie.quality && (
             <div>
               <span className="text-gray-400">Kvalitet:</span>
               <p className="text-white font-semibold">{movie.quality}</p>
             </div>
           )}
-          
+
           {movie.format && (
             <div>
               <span className="text-gray-400">Format:</span>
               <p className="text-white font-semibold">{movie.format}</p>
             </div>
           )}
-          
+
           {movie.audio && (
             <div>
               <span className="text-gray-400">Audio:</span>
               <p className="text-white font-semibold">{movie.audio}</p>
             </div>
           )}
-          
+
           {movie.collection && (
             <div>
               <span className="text-gray-400">Kolekcija:</span>
               <p className="text-white font-semibold">{movie.collection}</p>
             </div>
           )}
-          
+
           {movie.source && (
             <div>
               <span className="text-gray-400">Izvor:</span>
@@ -105,6 +110,13 @@ export default function MoviePlayer() {
           )}
         </div>
       </div>
+
+      {/* 🎬 NOVA SEKCIJA: Thumbnail Selector */}
+      <ThumbnailSelector
+        movieId={id}
+        videoRef={videoRef}
+        duration={videoDuration}
+      />
     </div>
   );
 }

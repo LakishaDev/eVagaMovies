@@ -1,10 +1,10 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import dotenv from 'dotenv';
+import Database from "better-sqlite3";
+import path from "path";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'movies.db');
+const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), "movies.db");
 const db = new Database(DB_PATH);
 
 export function initDatabase() {
@@ -45,7 +45,7 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_year ON movies(year);
   `);
 
-  console.log('✅ Database initialized');
+  console.log("✅ Database initialized");
 }
 
 export function addMovie(movieData) {
@@ -74,12 +74,12 @@ export function addMovie(movieData) {
 }
 
 export function getAllMovies() {
-  const stmt = db.prepare('SELECT * FROM movies ORDER BY title ASC');
+  const stmt = db.prepare("SELECT * FROM movies ORDER BY title ASC");
   return stmt.all();
 }
 
 export function getMovieById(id) {
-  const stmt = db.prepare('SELECT * FROM movies WHERE id = ?');
+  const stmt = db.prepare("SELECT * FROM movies WHERE id = ?");
   return stmt.get(id);
 }
 
@@ -131,10 +131,41 @@ export function updatePlayCount(id) {
   return stmt.run(id);
 }
 
+// 🎬 NOVA FUNKCIONALNOST: Ažuriranje thumbnail-a
+// Omogućava ažuriranje thumbnail putanje za film (kada korisnik bira novi frame)
+export function updateMovieThumbnail(id, thumbnailPath) {
+  const stmt = db.prepare(`
+    UPDATE movies 
+    SET thumbnail_path = ?
+    WHERE id = ?
+  `);
+  const result = stmt.run(thumbnailPath, id);
+
+  if (result.changes === 0) {
+    throw new Error(`Movie with id ${id} not found`);
+  }
+
+  return result;
+}
+
+// 🎬 NOVA FUNKCIONALNOST: Batch update thumbnail-a
+// Ažurira više thumbnail-a odjednom (npr. za sve filmove bez thumbnail-a)
+export function batchUpdateThumbnails(updates) {
+  // updates je niz objekta sa {id: ..., thumbnail_path: ...}
+  const stmt = db.prepare("UPDATE movies SET thumbnail_path = ? WHERE id = ?");
+  const transaction = db.transaction(() => {
+    for (const update of updates) {
+      stmt.run(update.thumbnail_path, update.id);
+    }
+  });
+
+  return transaction();
+}
+
 export function clearDatabase() {
-  db.exec('DELETE FROM movies');
-  db.exec('DELETE FROM collections');
-  console.log('✅ Database cleared');
+  db.exec("DELETE FROM movies");
+  db.exec("DELETE FROM collections");
+  console.log("✅ Database cleared");
 }
 
 export default db;
